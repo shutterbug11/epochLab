@@ -1,0 +1,207 @@
+<!-- Insert this article fragment below your neural-network playground GUI. Diagrams are openly licensed educational PNG images. -->
+<article class="epochs-article l--page" aria-labelledby="epochs-title">
+  <div class="ea-hero">
+    <p class="ea-eyebrow">The Epochs Learning Guide</p>
+    <h1 id="epochs-title">Inside a Neural Network</h1>
+    <p class="ea-deck">A visual guide to how neural networks turn data into predictions, discover patterns, and improve through training.</p>
+    <div class="ea-meta"><span>Beginner-friendly</span><span>·</span><span>8–10 min read</span><span>·</span><span>Concepts + diagrams</span></div>
+  </div>
+
+  <nav class="ea-toc" aria-label="Article contents">
+    <strong>In this guide</strong>
+    <a href="#ea-basics">The big idea</a><a href="#ea-neuron">Inside a neuron</a><a href="#ea-layers">Hidden layers</a><a href="#ea-training">Training</a><a href="#ea-experiments">Experiments</a><a href="#ea-generalization">Generalization</a><a href="#ea-architectures">Architectures</a><a href="#ea-glossary">Glossary</a>
+  </nav>
+
+  <section class="ea-section" id="ea-basics">
+    <p class="ea-kicker">01 / THE BIG IDEA</p>
+    <h2>What is a neural network?</h2>
+    <p>A neural network is a machine-learning model made from connected mathematical units called <strong>artificial neurons</strong>. It learns a mapping from inputs to outputs by adjusting internal parameters, mainly weights and biases, using examples from data.</p>
+    <p>In traditional programming, a developer writes explicit rules. In machine learning, we provide examples and a learning procedure; the model adjusts its parameters to capture patterns that help produce the desired output.</p>
+    <div class="ea-callout"><strong>The central idea:</strong> a neural network does not begin with a complete set of hand-written rules. Training adjusts its parameters so its predictions better match the examples.</div>
+    <h3>Follow the information</h3>
+    <p>During a prediction, information moves from the input layer, through hidden layers, to the output layer. This is called a <strong>forward pass</strong>.</p>
+    <figure class="ea-figure">
+      <img src="images/neural-network/neural-network-overview.png"
+           alt="Diagram of a feedforward neural network showing input units, hidden units, and output units connected by weighted edges"
+           loading="lazy"
+           class="ea-img" />
+      <figcaption>
+        <strong>Figure 1:</strong> Architecture of a feedforward artificial neural network with input, hidden, and output layers.
+        <span class="ea-attribution">Source: <a href="https://commons.wikimedia.org/wiki/File:Neural_Network.svg" target="_blank" rel="noopener noreferrer">Glosser.ca via Wikimedia Commons</a> (CC0 1.0 Public Domain).</span>
+      </figcaption>
+    </figure>
+    <p>The <strong>architecture</strong> describes how the units are arranged. Training determines the values of their parameters.</p>
+  </section>
+
+  <section class="ea-section" id="ea-neuron">
+    <p class="ea-kicker">02 / THE ARTIFICIAL NEURON</p>
+    <h2>What happens inside one neuron?</h2>
+    <p>A neuron multiplies each input by a weight, adds the results and a bias, then applies an activation function.</p>
+    <div class="ea-equation"><span>z = w₁x₁ + w₂x₂ + ··· + wₙxₙ + b</span><span>a = φ(z)</span></div>
+    <figure class="ea-figure">
+      <img src="images/neural-network/artificial-neuron.png"
+           alt="Mathematical diagram of an artificial neuron displaying inputs, weights, summation block with bias, activation function, and output"
+           loading="lazy"
+           class="ea-img" />
+      <figcaption>
+        <strong>Figure 2:</strong> Structure of an artificial neuron: inputs are weighted ($w_i x_i$), combined with a bias ($b$), transformed by an activation function $\varphi(z)$, and passed onward.
+        <span class="ea-attribution">Source: <a href="https://commons.wikimedia.org/wiki/File:Artificial_neuron_structure.svg" target="_blank" rel="noopener noreferrer">Chrislb via Wikimedia Commons</a> (CC0 1.0 Public Domain).</span>
+      </figcaption>
+    </figure>
+    <ul class="ea-list">
+      <li><strong>Weights</strong> control how strongly each input contributes.</li>
+      <li><strong>Bias</strong> shifts the weighted sum and helps determine when the neuron responds.</li>
+      <li><strong>Activation function</strong> transforms the result. Non-linear activations allow networks to represent complex relationships.</li>
+    </ul>
+    <h3>Common activation functions</h3>
+    <div class="ea-table-wrap"><table class="ea-table"><thead><tr><th>Function</th><th>Intuition</th><th>Typical role</th></tr></thead><tbody>
+      <tr><td><strong>ReLU</strong></td><td>Returns 0 for negative inputs; otherwise returns the input.</td><td>Common hidden-layer choice.</td></tr>
+      <tr><td><strong>Sigmoid</strong></td><td>Maps values to (0, 1).</td><td>Often used for a single binary output.</td></tr>
+      <tr><td><strong>Tanh</strong></td><td>Maps values to (−1, 1).</td><td>Zero-centred activation used in some networks.</td></tr>
+      <tr><td><strong>Softmax</strong></td><td>Converts scores into values that sum to 1.</td><td>Often used for mutually exclusive classes.</td></tr>
+    </tbody></table></div>
+    <figure class="ea-figure">
+      <img src="images/neural-network/activation-functions.png"
+           alt="Mathematical plots of common neural network activation functions including Sigmoid, Tanh, ReLU, Leaky ReLU, and ELU"
+           loading="lazy"
+           class="ea-img" />
+      <figcaption>
+        <strong>Figure 3:</strong> Comparison of common activation functions (Sigmoid, Tanh, ReLU, Leaky ReLU, and ELU) illustrating non-linear transformations and response ranges.
+        <span class="ea-attribution">Source: Andreas Maier, <em>“A gentle introduction to deep learning in medical image processing”</em> via <a href="https://commons.wikimedia.org/wiki/File:ActivationFunctions.svg" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a> (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>).</span>
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="ea-section" id="ea-layers">
+    <p class="ea-kicker">03 / LAYERS & REPRESENTATIONS</p>
+    <h2>Why do networks need hidden layers?</h2>
+    <p>A single neuron with two inputs creates a linear decision boundary: a straight line that separates two regions. This works for linearly separable data, but many datasets contain curved or intertwined patterns.</p>
+    <p>Hidden layers transform original inputs into intermediate representations. Individual neurons may respond to simple patterns; later layers combine those responses into more useful features.</p>
+    <figure class="ea-figure">
+      <img src="images/neural-network/decision-boundary.png"
+           alt="Illustration showing non-linear 2D input data transformed into a higher-dimensional feature space where classes become linearly separable"
+           loading="lazy"
+           class="ea-img" />
+      <figcaption>
+        <strong>Figure 4:</strong> Non-linear decision boundaries and feature representations. Hidden layers project complex, non-linearly separable input data into intermediate representations where classes can be separated by hyperplanes.
+        <span class="ea-attribution">Source: <a href="https://commons.wikimedia.org/wiki/File:Kernel_Machine.svg" target="_blank" rel="noopener noreferrer">Alisneaky via Wikimedia Commons</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>).</span>
+      </figcaption>
+    </figure>
+    <div class="ea-callout ea-callout-purple"><strong>Why non-linearity matters:</strong> without non-linear activations, stacked dense layers still reduce to one linear transformation.</div>
+    <p><strong>Width</strong> is the number of neurons in a layer. <strong>Depth</strong> is the number of layers. More units or layers can increase representational capacity, but also increase computation and may make training harder. Bigger is not automatically better.</p>
+  </section>
+
+  <section class="ea-section" id="ea-training">
+    <p class="ea-kicker">04 / HOW LEARNING WORKS</p>
+    <h2>How does a neural network learn?</h2>
+    <p>Training repeatedly compares predictions with known targets and adjusts parameters to reduce error. Four ideas work together: forward propagation, a loss function, backpropagation, and an optimizer.</p>
+    <figure class="ea-figure">
+      <img src="images/neural-network/gradient-descent.png"
+           alt="3D surface plot visualizing gradient descent navigating a multi-variable loss landscape toward a minimum"
+           loading="lazy"
+           class="ea-img" />
+      <figcaption>
+        <strong>Figure 5:</strong> Optimization with gradient descent. The optimizer uses backpropagated loss gradients to iteratively step down the error surface toward a parameter configuration that minimizes prediction loss.
+        <span class="ea-attribution">Source: <a href="https://commons.wikimedia.org/wiki/File:Gradient_descent.svg" target="_blank" rel="noopener noreferrer">Zerodamage via Wikimedia Commons</a> (CC0 1.0 Public Domain).</span>
+      </figcaption>
+    </figure>
+    <h3>1. Forward propagation</h3><p>The input passes through each layer in order. The final layer produces the prediction.</p>
+    <h3>2. Loss: how wrong was the prediction?</h3><p>A <strong>loss function</strong> measures prediction error. Mean squared error (MSE) is common for regression; binary or categorical cross-entropy is common for classification. Choose a loss that matches the task and output representation.</p>
+    <h3>3. Backpropagation: calculate gradients</h3><p>Backpropagation applies the chain rule to calculate how the loss changes with respect to each trainable parameter. It calculates gradients; it does not itself perform the parameter update.</p>
+    <h3>4. Optimization: update parameters</h3><p>An optimizer such as stochastic gradient descent (SGD) or Adam uses gradients to update weights and biases. The <strong>learning rate</strong> controls the update size: too large can make training unstable; too small can make learning slow.</p>
+    <div class="ea-equation">θ<sub>new</sub> = θ<sub>old</sub> − η ∇L(θ)</div>
+    <p>Here, θ represents trainable parameters, η is the learning rate, and ∇L is the gradient of the loss.</p>
+    <h3>What is an epoch?</h3><p>An <strong>epoch</strong> is one complete pass through the training dataset. Data is often divided into smaller batches, and the optimizer updates parameters after processing each batch. One epoch therefore usually contains multiple update steps.</p>
+  </section>
+
+  <section class="ea-section" id="ea-experiments">
+    <p class="ea-kicker">05 / LEARN BY EXPERIMENTING</p>
+    <h2>Build intuition with the playground</h2>
+    <p>Change one setting at a time and observe the result. If your playground exposes these controls, try these experiments:</p>
+    <div class="ea-experiment-grid">
+      <article class="ea-experiment"><span class="ea-step">EXPERIMENT 01</span><h3>Start simple</h3><p>Choose data that a straight line can separate. Train a small network.</p><p class="ea-observe"><strong>Observe:</strong> Does a simple boundary separate the classes?</p></article>
+      <article class="ea-experiment"><span class="ea-step">EXPERIMENT 02</span><h3>Add a hidden layer</h3><p>Try a dataset with a curved or complex pattern, then add a hidden layer.</p><p class="ea-observe"><strong>Observe:</strong> How does the decision boundary change?</p></article>
+      <article class="ea-experiment"><span class="ea-step">EXPERIMENT 03</span><h3>Change learning rate</h3><p>Compare low, moderate, and high learning rates while keeping other settings fixed.</p><p class="ea-observe"><strong>Observe:</strong> Does loss decrease slowly, smoothly, or erratically?</p></article>
+      <article class="ea-experiment"><span class="ea-step">EXPERIMENT 04</span><h3>Compare activations</h3><p>Compare ReLU with another available activation, resetting training between runs.</p><p class="ea-observe"><strong>Observe:</strong> Does the learned boundary or training behaviour change?</p></article>
+      <article class="ea-experiment"><span class="ea-step">EXPERIMENT 05</span><h3>Increase capacity</h3><p>Add neurons or another hidden layer and compare with the smaller model.</p><p class="ea-observe"><strong>Observe:</strong> Does validation performance improve too?</p></article>
+      <article class="ea-experiment"><span class="ea-step">EXPERIMENT 06</span><h3>Watch over epochs</h3><p>Track the loss and boundary over time instead of judging a single moment.</p><p class="ea-observe"><strong>Observe:</strong> When does improvement slow or become unstable?</p></article>
+    </div>
+    <p class="ea-small-note">The exact controls and metrics depend on your implementation. These are suggested experiments, not claims about a specific interface.</p>
+  </section>
+
+  <section class="ea-section" id="ea-generalization">
+    <p class="ea-kicker">06 / GENERALIZATION</p>
+    <h2>Learn patterns, not just examples</h2>
+    <p>A model can perform well on examples it has seen but poorly on new data. The goal is to learn patterns that generalize, not simply minimize training error.</p>
+    <div class="ea-table-wrap"><table class="ea-table"><thead><tr><th>Situation</th><th>Typical sign</th><th>What to investigate</th></tr></thead><tbody>
+      <tr><td><strong>Underfitting</strong></td><td>Training and validation performance are both poor.</td><td>Features, model capacity, optimization, or training duration.</td></tr>
+      <tr><td><strong>Useful fit</strong></td><td>Both sets show useful, reasonably consistent performance.</td><td>Confirm using a held-out test set.</td></tr>
+      <tr><td><strong>Overfitting</strong></td><td>Training performance improves while validation performance stalls or worsens.</td><td>More representative data, regularization, early stopping, or a smaller model.</td></tr>
+    </tbody></table></div>
+    <figure class="ea-figure">
+      <img src="images/neural-network/loss-curve.png"
+           alt="Loss curve plot comparing training error and validation error over training iterations showing the onset of overfitting"
+           loading="lazy"
+           class="ea-img" />
+      <figcaption>
+        <strong>Figure 6:</strong> Training vs. validation error curves. As training progresses, training error continuously decreases; a divergence where validation error begins to rise signals overfitting, marking the optimal point for early stopping.
+        <span class="ea-attribution">Source: <a href="https://commons.wikimedia.org/wiki/File:Overfitting_svg.svg" target="_blank" rel="noopener noreferrer">Gringer via Wikimedia Commons</a> (<a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>).</span>
+      </figcaption>
+    </figure>
+    <ul class="ea-list"><li><strong>Training set:</strong> used to learn model parameters.</li><li><strong>Validation set:</strong> used to compare configurations and guide choices such as early stopping.</li><li><strong>Test set:</strong> held back for a final estimate after model selection.</li></ul>
+    <p>For imbalanced classification, accuracy alone can be misleading. Precision, recall, F1 score, and a confusion matrix can reveal which kinds of errors the model makes.</p>
+  </section>
+
+  <section class="ea-section" id="ea-architectures">
+    <p class="ea-kicker">07 / NETWORK FAMILIES</p><h2>Different architectures suit different data</h2>
+    <p>A fully connected feed-forward network is a useful starting point, but it is only one family of neural networks.</p>
+    <div class="ea-architecture-grid">
+      <article class="ea-architecture"><div class="ea-arch-icon">MLP</div><h3>Multilayer perceptron</h3><p>Dense layers; often used for tabular data and introductory classification or regression.</p></article>
+      <article class="ea-architecture"><div class="ea-arch-icon">CNN</div><h3>Convolutional network</h3><p>Uses filters to detect local patterns; common in image tasks.</p></article>
+      <article class="ea-architecture"><div class="ea-arch-icon">RNN</div><h3>Recurrent network</h3><p>Processes sequences using recurrent state. LSTM and GRU variants address some limitations of basic RNNs.</p></article>
+      <article class="ea-architecture"><div class="ea-arch-icon">GNN</div><h3>Graph neural network</h3><p>Learns from nodes, edges, and their relationships in graph-structured data.</p></article>
+      <article class="ea-architecture"><div class="ea-arch-icon">GAN</div><h3>Generative adversarial network</h3><p>Trains a generator and discriminator in competition, often for data generation.</p></article>
+      <article class="ea-architecture"><div class="ea-arch-icon">T</div><h3>Transformer</h3><p>Uses attention to relate elements in a sequence or set; widely used in language and multimodal tasks.</p></article>
+    </div>
+    <figure class="ea-figure">
+      <img src="images/neural-network/cnn-architecture.png"
+           alt="Detailed architecture schematic of a Convolutional Neural Network showing input, convolutional feature maps, sub-sampling pooling layers, and fully connected dense layers"
+           loading="lazy"
+           class="ea-img" />
+      <figcaption>
+        <strong>Figure 7:</strong> Specialized architecture pipeline: a Convolutional Neural Network (CNN) combining spatial convolution filters, pooling layers for downsampling, and dense layers for output classification.
+        <span class="ea-attribution">Source: <a href="https://commons.wikimedia.org/wiki/File:Typical_cnn.png" target="_blank" rel="noopener noreferrer">Aphex34 via Wikimedia Commons</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>).</span>
+      </figcaption>
+    </figure>
+    <p>Choose an architecture based on the structure of the data, the task, available data and compute, and validation results.</p>
+  </section>
+
+  <section class="ea-section" id="ea-glossary">
+    <p class="ea-kicker">08 / QUICK REFERENCE</p><h2>Neural-network glossary</h2>
+    <div class="ea-glossary">
+      <p><strong>Activation:</strong> output of a neuron after its activation function.</p>
+      <p><strong>Bias:</strong> a trainable offset added to a weighted sum.</p>
+      <p><strong>Epoch:</strong> one complete pass through the training dataset.</p>
+      <p><strong>Feature:</strong> an input variable or a useful learned representation.</p>
+      <p><strong>Gradient:</strong> derivatives describing how a quantity changes with parameters.</p>
+      <p><strong>Inference:</strong> using a trained model to produce predictions.</p>
+      <p><strong>Learning rate:</strong> controls the size of optimizer updates.</p>
+      <p><strong>Loss:</strong> numerical objective measuring prediction error.</p>
+      <p><strong>Parameter:</strong> a learned value, such as a weight or bias.</p>
+      <p><strong>Hyperparameter:</strong> a setting chosen by the practitioner, such as learning rate or batch size.</p>
+    </div>
+    <div class="ea-end-card"><p class="ea-kicker">YOUR TURN</p><h2>Make the invisible visible.</h2><p>Return to the playground above. Change one setting, train the network, and explain what changed in the decision boundary, loss, or predictions. Repeat with another setting to build stronger intuition.</p></div>
+  </section>
+
+  <section class="ea-sources" aria-label="Further reading & Image Attributions">
+    <h2>Further reading & Image Attributions</h2>
+    <ol>
+      <li>Jared Wilber, <a href="https://mlu-explain.github.io/neural-networks/" target="_blank" rel="noopener noreferrer">“Neural Networks: A Visual Introduction”</a>, MLU-Explain. Visual explanations of neurons, activations, forward passes, loss, backpropagation, and architectures.</li>
+      <li>Kaz Sato, <a href="https://cloud.google.com/blog/products/ai-machine-learning/understanding-neural-networks-with-tensorflow-playground" target="_blank" rel="noopener noreferrer">“Understanding neural networks with TensorFlow Playground”</a>, Google Cloud Blog, 26 July 2016. Discusses single-neuron classification, hidden layers, feature transformations, and deeper abstractions through Playground experiments.</li>
+      <li><a href="https://www.tensorflow.org/guide/keras" target="_blank" rel="noopener noreferrer">TensorFlow Keras guide</a> for building and training neural-network models.</li>
+      <li><a href="https://d2l.ai/" target="_blank" rel="noopener noreferrer">Dive into Deep Learning</a> for a broader textbook-style treatment.</li>
+      <li>Educational diagrams sourced from open repositories under Creative Commons licenses (CC0, CC BY 4.0, CC BY 3.0, and CC BY-SA 4.0). Detailed licensing and contributor registry recorded in <a href="image-sources.md" target="_blank">image-sources.md</a>.</li>
+    </ol>
+    <p class="ea-disclaimer">This educational guide uses verified, openly licensed educational illustrations from Wikimedia Commons and peer-reviewed educational publications. Diagrams replace prior inline schematics with authentic reference diagrams.</p>
+  </section>
+</article>

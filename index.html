@@ -1,0 +1,814 @@
+<!doctype html>
+<html>
+<head lang="en">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1024">
+  <meta name="keywords" content="neural networks,machine learning,javascript">
+  <script>
+    (function() {
+      var t = localStorage.getItem('epochlab-theme') || localStorage.getItem('tronlab-theme');
+      if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+
+      var sc = localStorage.getItem('epochlab-sidebar-collapsed');
+      if (sc === 'true' || (sc === null && window.innerWidth < 768)) {
+        document.documentElement.classList.add('sidebar-is-collapsed');
+      } else {
+        document.documentElement.classList.add('sidebar-is-expanded');
+      }
+    })();
+  </script>
+
+  <meta property="og:type" content="website"/>
+  <meta property="og:title" content="EpochLab — Neural Network Laboratory"/>
+  <meta property="og:description" content="Tinker with a real neural network right here in your browser. Explore decision boundaries, activations, and architectures interactively.">
+  <meta property="og:image" content="preview.png"/>
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="EpochLab — Neural Network Laboratory">
+  <meta name="twitter:description" content="Tinker with a real neural network right here in your browser. Explore decision boundaries, activations, and architectures interactively.">
+  <meta name="twitter:image" content="preview.png">
+
+  <title>EpochLab — Neural Network Laboratory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto:300,400,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="bundle.css" type="text/css">
+  <script src="lib.js"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <h1 class="l--page">Tinker With a <b>Neural Network</b> <span class="optional">Right Here </span>in Your Browser.<br>Don’t Worry, You Can’t Break It. We Promise.</h1>
+    <button id="theme-toggle" class="theme-toggle-btn" title="Toggle dark mode">
+      <i class="material-icons icon-dark">dark_mode</i>
+      <i class="material-icons icon-light">light_mode</i>
+    </button>
+  </header>
+
+  <!-- Main Playground Workspace Layout -->
+  <div class="playground-workspace">
+
+  <!-- Main Part -->
+  <div id="main-part" class="l--page">
+
+    <!--  Data Column-->
+    <div class="column data">
+      <h4>
+        <span>Data</span>
+      </h4>
+      <div class="ui-dataset">
+        <p>Which dataset do you want to use?</p>
+        <div class="dataset-list">
+          <div class="dataset" title="Circle">
+            <canvas class="data-thumbnail" data-dataset="circle"></canvas>
+          </div>
+          <div class="dataset" title="Exclusive or">
+            <canvas class="data-thumbnail" data-dataset="xor"></canvas>
+          </div>
+          <div class="dataset" title="Gaussian">
+            <canvas class="data-thumbnail" data-dataset="gauss"></canvas>
+          </div>
+          <div class="dataset" title="Spiral">
+            <canvas class="data-thumbnail" data-dataset="spiral"></canvas>
+          </div>
+          <div class="dataset" title="Plane">
+            <canvas class="data-thumbnail" data-regDataset="reg-plane"></canvas>
+          </div>
+          <div class="dataset" title="Multi gaussian">
+            <canvas class="data-thumbnail" data-regDataset="reg-gauss"></canvas>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="ui-percTrainData">
+          <label for="percTrainData">Ratio of training to test data:&nbsp;&nbsp;<span class="value">XX</span>%</label>
+          <p class="slider">
+            <input class="mdl-slider mdl-js-slider" type="range" id="percTrainData" min="10" max="90" step="10">
+          </p>
+        </div>
+        <div class="ui-noise">
+          <label for="noise">Noise:&nbsp;&nbsp;<span class="value">XX</span></label>
+          <p class="slider">
+            <input class="mdl-slider mdl-js-slider" type="range" id="noise" min="0" max="50" step="5">
+          </p>
+        </div>
+        <div class="ui-batchSize">
+          <label for="batchSize">Batch size:&nbsp;&nbsp;<span class="value">XX</span></label>
+          <p class="slider">
+            <input class="mdl-slider mdl-js-slider" type="range" id="batchSize" min="1" max="30" step="1">
+          </p>
+        </div>
+          <button class="basic-button" id="data-regen-button" title="Regenerate data">
+            Regenerate
+          </button>
+      </div>
+    </div>
+
+    <!-- Features Column -->
+    <div class="column features">
+      <h4>Features</h4>
+      <p>Which properties do you want to feed in?</p>
+      <div id="network">
+        <svg id="svg" width="510" height="450">
+          <defs>
+            <marker id="markerArrow" markerWidth="7" markerHeight="13" refX="1" refY="6" orient="auto" markerUnits="userSpaceOnUse">
+              <path d="M2,11 L7,6 L2,2" />
+            </marker>
+          </defs>
+        </svg>
+        <!-- Hover card -->
+        <div id="hovercard">
+          <div style="font-size:10px">Click anywhere to edit.</div>
+          <div><span class="type">Weight/Bias</span> is <span class="value">0.2</span><span><input type="number"/></span>.</div>
+        </div>
+        <div class="callout thumbnail">
+          <svg viewBox="0 0 30 30">
+            <defs>
+              <marker id="arrow" markerWidth="5" markerHeight="5" refx="5" refy="2.5" orient="auto" markerUnits="userSpaceOnUse">
+                <path d="M0,0 L5,2.5 L0,5 z"/>
+              </marker>
+            </defs>
+            <path d="M12,30C5,20 2,15 12,0" marker-end="url(#arrow)">
+          </svg>
+          <div class="label">
+            This is the output from one <b>neuron</b>. Hover to see it larger.
+          </div>
+        </div>
+        <div class="callout weights">
+          <svg viewBox="0 0 30 30">
+            <defs>
+              <marker id="arrow" markerWidth="5" markerHeight="5" refx="5" refy="2.5" orient="auto" markerUnits="userSpaceOnUse">
+                <path d="M0,0 L5,2.5 L0,5 z"/>
+              </marker>
+            </defs>
+            <path d="M12,30C5,20 2,15 12,0" marker-end="url(#arrow)">
+          </svg>
+          <div class="label">
+            The outputs are mixed with varying <b>weights</b>, shown by the thickness of the lines.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden Layers Column -->
+    <div class="column hidden-layers">
+      <h4>
+        <div class="ui-numHiddenLayers">
+          <button id="add-layers" class="mdl-button mdl-js-button mdl-button--icon">
+            <i class="material-icons">add</i>
+          </button>
+          <button id="remove-layers" class="mdl-button mdl-js-button mdl-button--icon">
+            <i class="material-icons">remove</i>
+          </button>
+        </div>
+        <span id="num-layers"></span>
+        <span id="layers-label"></span>
+      </h4>
+      <div class="bracket"></div>
+    </div>
+
+    <!-- Output Column -->
+    <div class="column output">
+      <h4>Output</h4>
+      <div class="metrics">
+        <div class="output-stats ui-percTrainData">
+          <span>Test loss</span>
+          <div class="value" id="loss-test"></div>
+        </div>
+        <div class="output-stats train">
+          <span>Training loss</span>
+          <div class="value" id="loss-train"></div>
+        </div>
+        <div id="linechart"></div>
+      </div>
+      <div id="heatmap"></div>
+      <div style="float:left;margin-top:20px">
+        <div style="display:flex; align-items:center;">
+
+          <!-- Gradient color scale -->
+          <div class="label" style="width:105px; margin-right: 10px">
+            Colors shows data, neuron and weight values.
+          </div>
+          <svg width="150" height="30" id="colormap">
+            <defs>
+              <linearGradient id="gradient" x1="0%" y1="100%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#f59322" stop-opacity="1"></stop>
+                <stop offset="50%" stop-color="#e8eaeb" stop-opacity="1"></stop>
+                <stop offset="100%" stop-color="#0877bd" stop-opacity="1"></stop>
+              </linearGradient>
+            </defs>
+            <g class="core" transform="translate(3, 0)">
+              <rect width="144" height="10" style="fill: url('#gradient');"></rect>
+            </g>
+          </svg>
+        </div>
+        <br/>
+        <div style="display:flex;">
+          <label class="ui-showTestData mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="show-test-data">
+            <input type="checkbox" id="show-test-data" class="mdl-checkbox__input" checked>
+            <span class="mdl-checkbox__label label">Show test data</span>
+          </label>
+          <label class="ui-discretize mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="discretize">
+            <input type="checkbox" id="discretize" class="mdl-checkbox__input" checked>
+            <span class="mdl-checkbox__label label">Discretize output</span>
+          </label>
+        </div>
+      </div>
+  </div>
+  </div>
+
+  <!-- Retractable Curved-Edge Control Sidebar Attached to Right Viewport Edge -->
+  <aside id="control-sidebar" class="control-sidebar" role="region" aria-label="Training controls">
+    <!-- Retractable Curved Toggle Handle -->
+    <button id="sidebar-toggle" class="sidebar-toggle-handle" aria-label="Collapse controls" title="Collapse controls (Press [ to toggle)">
+      <i class="material-icons toggle-icon">chevron_right</i>
+    </button>
+
+    <div class="sidebar-content" id="sidebar-content">
+      <!-- Training toolbar -->
+      <div class="timeline-controls">
+        <button class="mdl-button mdl-js-button mdl-button--icon ui-resetButton" id="reset-button" title="Reset the network">
+          <i class="material-icons">replay</i>
+        </button>
+        <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored ui-playButton" id="play-pause-button" title="Run/Pause">
+          <i class="material-icons">play_arrow</i>
+          <i class="material-icons">pause</i>
+        </button>
+        <button class="mdl-button mdl-js-button mdl-button--icon ui-stepButton" id="next-step-button" title="Step">
+          <i class="material-icons">skip_next</i>
+        </button>
+        <button class="mdl-button mdl-js-button mdl-button--icon ui-shareButton" id="share-button" title="Share configuration & snapshot">
+          <i class="material-icons">share</i>
+        </button>
+        <button class="mdl-button mdl-js-button mdl-button--icon ui-exportButton" id="export-button" title="Export & Download (PNG / GIF / JSON)">
+          <i class="material-icons">file_download</i>
+        </button>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <!-- Training parameters -->
+      <div class="control ui-epoch">
+        <span class="label">Epoch</span>
+        <span class="value" id="iter-number"></span>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="control ui-learningRate">
+        <label for="learningRate">Learning rate</label>
+        <div class="select">
+          <select id="learningRate">
+            <option value="0.00001">0.00001</option>
+            <option value="0.0001">0.0001</option>
+            <option value="0.001">0.001</option>
+            <option value="0.003">0.003</option>
+            <option value="0.01">0.01</option>
+            <option value="0.03">0.03</option>
+            <option value="0.1">0.1</option>
+            <option value="0.3">0.3</option>
+            <option value="1">1</option>
+            <option value="3">3</option>
+            <option value="10">10</option>
+          </select>
+        </div>
+      </div>
+      <div class="control ui-activation">
+        <label for="activations">Activation</label>
+        <div class="select">
+          <select id="activations">
+            <option value="relu">ReLU</option>
+            <option value="tanh">Tanh</option>
+            <option value="sigmoid">Sigmoid</option>
+            <option value="linear">Linear</option>
+          </select>
+        </div>
+      </div>
+      <div class="control ui-regularization">
+        <label for="regularizations">Regularization</label>
+        <div class="select">
+          <select id="regularizations">
+            <option value="none">None</option>
+            <option value="L1">L1</option>
+            <option value="L2">L2</option>
+          </select>
+        </div>
+      </div>
+      <div class="control ui-regularizationRate">
+        <label for="regularRate">Regularization rate</label>
+        <div class="select">
+          <select id="regularRate">
+            <option value="0">0</option>
+            <option value="0.001">0.001</option>
+            <option value="0.003">0.003</option>
+            <option value="0.01">0.01</option>
+            <option value="0.03">0.03</option>
+            <option value="0.1">0.1</option>
+            <option value="0.3">0.3</option>
+            <option value="1">1</option>
+            <option value="3">3</option>
+            <option value="10">10</option>
+          </select>
+        </div>
+      </div>
+      <div class="control ui-problem">
+        <label for="problem">Problem type</label>
+        <div class="select">
+          <select id="problem">
+            <option value="classification">Classification</option>
+            <option value="regression">Regression</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Mobile Backdrop Overlay -->
+  <div id="sidebar-backdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+
+  <!-- ==========================================================================
+       Educational Guide: Inside a Neural Network (Epochs Learning Guide)
+       Diagrams are verified, openly licensed educational PNG resources from Wikimedia Commons.
+       ========================================================================== -->
+  <article class="epochs-article l--page" aria-labelledby="epochs-title">
+    <div class="ea-hero">
+      <p class="ea-eyebrow">The Epochs Learning Guide</p>
+      <h1 id="epochs-title">Inside a Neural Network</h1>
+      <p class="ea-deck">A visual guide to how neural networks turn data into predictions, discover patterns, and improve through training.</p>
+      <div class="ea-meta"><span>Beginner-friendly</span><span>·</span><span>8–10 min read</span><span>·</span><span>Concepts + diagrams</span></div>
+    </div>
+
+    <nav class="ea-toc" aria-label="Article contents">
+      <strong>In this guide</strong>
+      <a href="#ea-basics">The big idea</a><a href="#ea-neuron">Inside a neuron</a><a href="#ea-layers">Hidden layers</a><a href="#ea-training">Training</a><a href="#ea-experiments">Experiments</a><a href="#ea-generalization">Generalization</a><a href="#ea-architectures">Architectures</a><a href="#ea-glossary">Glossary</a>
+    </nav>
+
+    <section class="ea-section" id="ea-basics">
+      <p class="ea-kicker">01 / THE BIG IDEA</p>
+      <h2>What is a neural network?</h2>
+      <p>A neural network is a machine-learning model made from connected mathematical units called <strong>artificial neurons</strong>. It learns a mapping from inputs to outputs by adjusting internal parameters, mainly weights and biases, using examples from data.</p>
+      <p>In traditional programming, a developer writes explicit rules. In machine learning, we provide examples and a learning procedure; the model adjusts its parameters to capture patterns that help produce the desired output.</p>
+      <div class="ea-callout"><strong>The central idea:</strong> a neural network does not begin with a complete set of hand-written rules. Training adjusts its parameters so its predictions better match the examples.</div>
+      <h3>Follow the information</h3>
+      <p>During a prediction, information moves from the input layer, through hidden layers, to the output layer. This is called a <strong>forward pass</strong>.</p>
+      <figure class="ea-figure">
+        <img src="images/neural-network/neural-network-overview.png"
+             alt="Diagram of a feedforward neural network showing input units, hidden units, and output units connected by weighted edges"
+             loading="lazy"
+             class="ea-img" />
+        <figcaption>
+          <strong>Figure 1:</strong> Architecture of a feedforward artificial neural network with input, hidden, and output layers.
+          <span class="ea-attribution">Source: <a href="https://commons.wikimedia.org/wiki/File:Neural_Network.svg" target="_blank" rel="noopener noreferrer">Glosser.ca via Wikimedia Commons</a> (CC0 1.0 Public Domain).</span>
+        </figcaption>
+      </figure>
+      <p>The <strong>architecture</strong> describes how the units are arranged. Training determines the values of their parameters.</p>
+    </section>
+
+    <section class="ea-section" id="ea-neuron">
+      <p class="ea-kicker">02 / THE ARTIFICIAL NEURON</p>
+      <h2>What happens inside one neuron?</h2>
+      <p>A neuron multiplies each input by a weight, adds the results and a bias, then applies an activation function.</p>
+      <div class="ea-equation"><span>z = w₁x₁ + w₂x₂ + ··· + wₙxₙ + b</span><span>a = φ(z)</span></div>
+      <figure class="ea-figure">
+        <img src="images/neural-network/artificial-neuron.png"
+             alt="Mathematical diagram of an artificial neuron displaying inputs, weights, summation block with bias, activation function, and output"
+             loading="lazy"
+             class="ea-img" />
+        <figcaption>
+          <strong>Figure 2:</strong> Structure of an artificial neuron: inputs are weighted ($w_i x_i$), combined with a bias ($b$), transformed by an activation function $\varphi(z)$, and passed onward.
+          <span class="ea-attribution">Source: <a href="https://commons.wikimedia.org/wiki/File:Artificial_neuron_structure.svg" target="_blank" rel="noopener noreferrer">Chrislb via Wikimedia Commons</a> (CC0 1.0 Public Domain).</span>
+        </figcaption>
+      </figure>
+      <ul class="ea-list">
+        <li><strong>Weights</strong> control how strongly each input contributes.</li>
+        <li><strong>Bias</strong> shifts the weighted sum and helps determine when the neuron responds.</li>
+        <li><strong>Activation function</strong> transforms the result. Non-linear activations allow networks to represent complex relationships.</li>
+      </ul>
+      <h3>Common activation functions</h3>
+      <div class="ea-table-wrap"><table class="ea-table"><thead><tr><th>Function</th><th>Intuition</th><th>Typical role</th></tr></thead><tbody>
+        <tr><td><strong>ReLU</strong></td><td>Returns 0 for negative inputs; otherwise returns the input.</td><td>Common hidden-layer choice.</td></tr>
+        <tr><td><strong>Sigmoid</strong></td><td>Maps values to (0, 1).</td><td>Often used for a single binary output.</td></tr>
+        <tr><td><strong>Tanh</strong></td><td>Maps values to (−1, 1).</td><td>Zero-centred activation used in some networks.</td></tr>
+        <tr><td><strong>Softmax</strong></td><td>Converts scores into values that sum to 1.</td><td>Often used for mutually exclusive classes.</td></tr>
+      </tbody></table></div>
+      <figure class="ea-figure">
+        <img src="images/neural-network/activation-functions.png"
+             alt="Mathematical plots of common neural network activation functions including Sigmoid, Tanh, ReLU, Leaky ReLU, and ELU"
+             loading="lazy"
+             class="ea-img" />
+        <figcaption>
+          <strong>Figure 3:</strong> Comparison of common activation functions (Sigmoid, Tanh, ReLU, Leaky ReLU, and ELU) illustrating non-linear transformations and response ranges.
+          <span class="ea-attribution">Source: Andreas Maier, <em>“A gentle introduction to deep learning in medical image processing”</em> via <a href="https://commons.wikimedia.org/wiki/File:ActivationFunctions.svg" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a> (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>).</span>
+        </figcaption>
+      </figure>
+    </section>
+
+    <section class="ea-section" id="ea-layers">
+      <p class="ea-kicker">03 / LAYERS & REPRESENTATIONS</p>
+      <h2>Why do networks need hidden layers?</h2>
+      <p>A single neuron with two inputs creates a linear decision boundary: a straight line that separates two regions. This works for linearly separable data, but many datasets contain curved or intertwined patterns.</p>
+      <p>Hidden layers transform original inputs into intermediate representations. Individual neurons may respond to simple patterns; later layers combine those responses into more useful features.</p>
+      <figure class="ea-figure">
+        <img src="images/neural-network/decision-boundary.png"
+             alt="Illustration showing non-linear 2D input data transformed into a higher-dimensional feature space where classes become linearly separable"
+             loading="lazy"
+             class="ea-img" />
+        <figcaption>
+          <strong>Figure 4:</strong> Non-linear decision boundaries and feature representations. Hidden layers project complex, non-linearly separable input data into intermediate representations where classes can be separated by hyperplanes.
+          <span class="ea-attribution">Source: <a href="https://commons.wikimedia.org/wiki/File:Kernel_Machine.svg" target="_blank" rel="noopener noreferrer">Alisneaky via Wikimedia Commons</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>).</span>
+        </figcaption>
+      </figure>
+      <div class="ea-callout ea-callout-purple"><strong>Why non-linearity matters:</strong> without non-linear activations, stacked dense layers still reduce to one linear transformation.</div>
+      <p><strong>Width</strong> is the number of neurons in a layer. <strong>Depth</strong> is the number of layers. More units or layers can increase representational capacity, but also increase computation and may make training harder. Bigger is not automatically better.</p>
+    </section>
+
+    <section class="ea-section" id="ea-training">
+      <p class="ea-kicker">04 / HOW LEARNING WORKS</p>
+      <h2>How does a neural network learn?</h2>
+      <p>Training repeatedly compares predictions with known targets and adjusts parameters to reduce error. Four ideas work together: forward propagation, a loss function, backpropagation, and an optimizer.</p>
+      <figure class="ea-figure">
+        <img src="images/neural-network/gradient-descent.png"
+             alt="3D surface plot visualizing gradient descent navigating a multi-variable loss landscape toward a minimum"
+             loading="lazy"
+             class="ea-img" />
+        <figcaption>
+          <strong>Figure 5:</strong> Optimization with gradient descent. The optimizer uses backpropagated loss gradients to iteratively step down the error surface toward a parameter configuration that minimizes prediction loss.
+          <span class="ea-attribution">Source: <a href="https://commons.wikimedia.org/wiki/File:Gradient_descent.svg" target="_blank" rel="noopener noreferrer">Zerodamage via Wikimedia Commons</a> (CC0 1.0 Public Domain).</span>
+        </figcaption>
+      </figure>
+      <h3>1. Forward propagation</h3><p>The input passes through each layer in order. The final layer produces the prediction.</p>
+      <h3>2. Loss: how wrong was the prediction?</h3><p>A <strong>loss function</strong> measures prediction error. Mean squared error (MSE) is common for regression; binary or categorical cross-entropy is common for classification. Choose a loss that matches the task and output representation.</p>
+      <h3>3. Backpropagation: calculate gradients</h3><p>Backpropagation applies the chain rule to calculate how the loss changes with respect to each trainable parameter. It calculates gradients; it does not itself perform the parameter update.</p>
+      <h3>4. Optimization: update parameters</h3><p>An optimizer such as stochastic gradient descent (SGD) or Adam uses gradients to update weights and biases. The <strong>learning rate</strong> controls the update size: too large can make training unstable; too small can make learning slow.</p>
+      <div class="ea-equation">θ<sub>new</sub> = θ<sub>old</sub> − η ∇L(θ)</div>
+      <p>Here, θ represents trainable parameters, η is the learning rate, and ∇L is the gradient of the loss.</p>
+      <h3>What is an epoch?</h3><p>An <strong>epoch</strong> is one complete pass through the training dataset. Data is often divided into smaller batches, and the optimizer updates parameters after processing each batch. One epoch therefore usually contains multiple update steps.</p>
+    </section>
+
+    <section class="ea-section" id="ea-experiments">
+      <p class="ea-kicker">05 / LEARN BY EXPERIMENTING</p>
+      <h2>Build intuition with the playground</h2>
+      <p>Change one setting at a time and observe the result. If your playground exposes these controls, try these experiments:</p>
+      <div class="ea-experiment-grid">
+        <article class="ea-experiment"><span class="ea-step">EXPERIMENT 01</span><h3>Start simple</h3><p>Choose data that a straight line can separate. Train a small network.</p><p class="ea-observe"><strong>Observe:</strong> Does a simple boundary separate the classes?</p></article>
+        <article class="ea-experiment"><span class="ea-step">EXPERIMENT 02</span><h3>Add a hidden layer</h3><p>Try a dataset with a curved or complex pattern, then add a hidden layer.</p><p class="ea-observe"><strong>Observe:</strong> How does the decision boundary change?</p></article>
+        <article class="ea-experiment"><span class="ea-step">EXPERIMENT 03</span><h3>Change learning rate</h3><p>Compare low, moderate, and high learning rates while keeping other settings fixed.</p><p class="ea-observe"><strong>Observe:</strong> Does loss decrease slowly, smoothly, or erratically?</p></article>
+        <article class="ea-experiment"><span class="ea-step">EXPERIMENT 04</span><h3>Compare activations</h3><p>Compare ReLU with another available activation, resetting training between runs.</p><p class="ea-observe"><strong>Observe:</strong> Does the learned boundary or training behaviour change?</p></article>
+        <article class="ea-experiment"><span class="ea-step">EXPERIMENT 05</span><h3>Increase capacity</h3><p>Add neurons or another hidden layer and compare with the smaller model.</p><p class="ea-observe"><strong>Observe:</strong> Does validation performance improve too?</p></article>
+        <article class="ea-experiment"><span class="ea-step">EXPERIMENT 06</span><h3>Watch over epochs</h3><p>Track the loss and boundary over time instead of judging a single moment.</p><p class="ea-observe"><strong>Observe:</strong> When does improvement slow or become unstable?</p></article>
+      </div>
+      <p class="ea-small-note">The exact controls and metrics depend on your implementation. These are suggested experiments, not claims about a specific interface.</p>
+    </section>
+
+    <section class="ea-section" id="ea-generalization">
+      <p class="ea-kicker">06 / GENERALIZATION</p>
+      <h2>Learn patterns, not just examples</h2>
+      <p>A model can perform well on examples it has seen but poorly on new data. The goal is to learn patterns that generalize, not simply minimize training error.</p>
+      <div class="ea-table-wrap"><table class="ea-table"><thead><tr><th>Situation</th><th>Typical sign</th><th>What to investigate</th></tr></thead><tbody>
+        <tr><td><strong>Underfitting</strong></td><td>Training and validation performance are both poor.</td><td>Features, model capacity, optimization, or training duration.</td></tr>
+        <tr><td><strong>Useful fit</strong></td><td>Both sets show useful, reasonably consistent performance.</td><td>Confirm using a held-out test set.</td></tr>
+        <tr><td><strong>Overfitting</strong></td><td>Training performance improves while validation performance stalls or worsens.</td><td>More representative data, regularization, early stopping, or a smaller model.</td></tr>
+      </tbody></table></div>
+      <figure class="ea-figure">
+        <img src="images/neural-network/loss-curve.png"
+             alt="Loss curve plot comparing training error and validation error over training iterations showing the onset of overfitting"
+             loading="lazy"
+             class="ea-img" />
+        <figcaption>
+          <strong>Figure 6:</strong> Training vs. validation error curves. As training progresses, training error continuously decreases; a divergence where validation error begins to rise signals overfitting, marking the optimal point for early stopping.
+          <span class="ea-attribution">Source: <a href="https://commons.wikimedia.org/wiki/File:Overfitting_svg.svg" target="_blank" rel="noopener noreferrer">Gringer via Wikimedia Commons</a> (<a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noopener noreferrer">CC BY 3.0</a>).</span>
+        </figcaption>
+      </figure>
+      <ul class="ea-list"><li><strong>Training set:</strong> used to learn model parameters.</li><li><strong>Validation set:</strong> used to compare configurations and guide choices such as early stopping.</li><li><strong>Test set:</strong> held back for a final estimate after model selection.</li></ul>
+      <p>For imbalanced classification, accuracy alone can be misleading. Precision, recall, F1 score, and a confusion matrix can reveal which kinds of errors the model makes.</p>
+    </section>
+
+    <section class="ea-section" id="ea-architectures">
+      <p class="ea-kicker">07 / NETWORK FAMILIES</p><h2>Different architectures suit different data</h2>
+      <p>A fully connected feed-forward network is a useful starting point, but it is only one family of neural networks.</p>
+      <div class="ea-architecture-grid">
+        <article class="ea-architecture"><div class="ea-arch-icon">MLP</div><h3>Multilayer perceptron</h3><p>Dense layers; often used for tabular data and introductory classification or regression.</p></article>
+        <article class="ea-architecture"><div class="ea-arch-icon">CNN</div><h3>Convolutional network</h3><p>Uses filters to detect local patterns; common in image tasks.</p></article>
+        <article class="ea-architecture"><div class="ea-arch-icon">RNN</div><h3>Recurrent network</h3><p>Processes sequences using recurrent state. LSTM and GRU variants address some limitations of basic RNNs.</p></article>
+        <article class="ea-architecture"><div class="ea-arch-icon">GNN</div><h3>Graph neural network</h3><p>Learns from nodes, edges, and their relationships in graph-structured data.</p></article>
+        <article class="ea-architecture"><div class="ea-arch-icon">GAN</div><h3>Generative adversarial network</h3><p>Trains a generator and discriminator in competition, often for data generation.</p></article>
+        <article class="ea-architecture"><div class="ea-arch-icon">T</div><h3>Transformer</h3><p>Uses attention to relate elements in a sequence or set; widely used in language and multimodal tasks.</p></article>
+      </div>
+      <figure class="ea-figure">
+        <img src="images/neural-network/cnn-architecture.png"
+             alt="Detailed architecture schematic of a Convolutional Neural Network showing input, convolutional feature maps, sub-sampling pooling layers, and fully connected dense layers"
+             loading="lazy"
+             class="ea-img" />
+        <figcaption>
+          <strong>Figure 7:</strong> Specialized architecture pipeline: a Convolutional Neural Network (CNN) combining spatial convolution filters, pooling layers for downsampling, and dense layers for output classification.
+          <span class="ea-attribution">Source: <a href="https://commons.wikimedia.org/wiki/File:Typical_cnn.png" target="_blank" rel="noopener noreferrer">Aphex34 via Wikimedia Commons</a> (<a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>).</span>
+        </figcaption>
+      </figure>
+      <p>Choose an architecture based on the structure of the data, the task, available data and compute, and validation results.</p>
+    </section>
+
+    <section class="ea-section" id="ea-glossary">
+      <p class="ea-kicker">08 / QUICK REFERENCE</p><h2>Neural-network glossary</h2>
+      <div class="ea-glossary">
+        <p><strong>Activation:</strong> output of a neuron after its activation function.</p>
+        <p><strong>Bias:</strong> a trainable offset added to a weighted sum.</p>
+        <p><strong>Epoch:</strong> one complete pass through the training dataset.</p>
+        <p><strong>Feature:</strong> an input variable or a useful learned representation.</p>
+        <p><strong>Gradient:</strong> derivatives describing how a quantity changes with parameters.</p>
+        <p><strong>Inference:</strong> using a trained model to produce predictions.</p>
+        <p><strong>Learning rate:</strong> controls the size of optimizer updates.</p>
+        <p><strong>Loss:</strong> numerical objective measuring prediction error.</p>
+        <p><strong>Parameter:</strong> a learned value, such as a weight or bias.</p>
+        <p><strong>Hyperparameter:</strong> a setting chosen by the practitioner, such as learning rate or batch size.</p>
+      </div>
+      <div class="ea-end-card"><p class="ea-kicker">YOUR TURN</p><h2>Make the invisible visible.</h2><p>Return to the playground above. Change one setting, train the network, and explain what changed in the decision boundary, loss, or predictions. Repeat with another setting to build stronger intuition.</p></div>
+    </section>
+
+    <section class="ea-sources" aria-label="Further reading & Image Attributions">
+      <h2>Further reading & Image Attributions</h2>
+      <ol>
+        <li>Jared Wilber, <a href="https://mlu-explain.github.io/neural-networks/" target="_blank" rel="noopener noreferrer">“Neural Networks: A Visual Introduction”</a>, MLU-Explain. Visual explanations of neurons, activations, forward passes, loss, backpropagation, and architectures.</li>
+        <li>Kaz Sato, <a href="https://cloud.google.com/blog/products/ai-machine-learning/understanding-neural-networks-with-tensorflow-playground" target="_blank" rel="noopener noreferrer">“Understanding neural networks with TensorFlow Playground”</a>, Google Cloud Blog, 26 July 2016. Discusses single-neuron classification, hidden layers, feature transformations, and deeper abstractions through Playground experiments.</li>
+        <li><a href="https://www.tensorflow.org/guide/keras" target="_blank" rel="noopener noreferrer">TensorFlow Keras guide</a> for building and training neural-network models.</li>
+        <li><a href="https://d2l.ai/" target="_blank" rel="noopener noreferrer">Dive into Deep Learning</a> for a broader textbook-style treatment.</li>
+        <li>Educational diagrams sourced from open repositories under Creative Commons licenses (CC0, CC BY 4.0, CC BY 3.0, and CC BY-SA 4.0). Detailed licensing and contributor registry recorded in <a href="image-sources.md" target="_blank">image-sources.md</a>.</li>
+      </ol>
+      <p class="ea-disclaimer">This educational guide uses verified, openly licensed educational illustrations from Wikimedia Commons and peer-reviewed educational publications. Diagrams replace prior inline schematics with authentic reference diagrams.</p>
+    </section>
+  </article>
+
+  <!-- Share Modal Dialog -->
+  <div id="share-modal" class="share-modal-overlay">
+    <div class="share-modal-card">
+      <div class="share-modal-header">
+        <div class="share-modal-title">
+          <i class="material-icons">share</i>
+          <span>Share Configuration</span>
+        </div>
+        <button id="close-share-modal" class="mdl-button mdl-js-button mdl-button--icon" title="Close">
+          <i class="material-icons">close</i>
+        </button>
+      </div>
+
+      <div class="share-modal-body">
+        <!-- Live Preview Thumbnail Card -->
+        <div class="share-preview-card">
+          <div class="share-preview-img-container">
+            <img id="share-preview-img" alt="Decision Boundary Preview" />
+          </div>
+          <div class="share-preview-info">
+            <h5 id="share-preview-title">EpochLab Neural Model</h5>
+            <p id="share-preview-desc">Trained on Circle dataset with Tanh activation.</p>
+            <div class="share-preview-tags" id="share-preview-tags">
+              <!-- Dynamically populated: Epoch, Loss, etc. -->
+            </div>
+          </div>
+        </div>
+
+        <!-- URL Input with Copy Button -->
+        <div class="share-url-container">
+          <input type="text" id="share-url-input" readonly spellcheck="false" />
+          <button id="copy-share-url-button" class="basic-button share-copy-btn">
+            <i class="material-icons">content_copy</i>
+            <span>Copy</span>
+          </button>
+        </div>
+
+        <div class="share-options-row">
+          <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="shorten-url-toggle">
+            <input type="checkbox" id="shorten-url-toggle" class="mdl-checkbox__input">
+            <span class="mdl-checkbox__label label">Short URL</span>
+          </label>
+          <button id="download-snapshot-button" class="basic-button snapshot-download-btn">
+            <i class="material-icons">image</i>
+            <span>Download PNG</span>
+          </button>
+          <button id="open-export-studio-btn" class="basic-button snapshot-download-btn">
+            <i class="material-icons">tune</i>
+            <span>Export Studio</span>
+          </button>
+        </div>
+
+        <!-- Social Share Quick Links -->
+        <div class="share-social-section">
+          <span class="share-social-label">Share directly to:</span>
+          <div class="share-social-buttons">
+            <a id="share-twitter-btn" target="_blank" rel="noopener noreferrer" class="social-share-btn twitter" title="Share on X / Twitter">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+              <span>X (Twitter)</span>
+            </a>
+            <a id="share-reddit-btn" target="_blank" rel="noopener noreferrer" class="social-share-btn reddit" title="Share on Reddit">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.702zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.197-2.512-.73a.326.326 0 0 0-.232-.095z"/>
+              </svg>
+              <span>Reddit</span>
+            </a>
+            <a id="share-linkedin-btn" target="_blank" rel="noopener noreferrer" class="social-share-btn linkedin" title="Share on LinkedIn">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+              </svg>
+              <span>LinkedIn</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Export & Download Studio Modal -->
+  <div id="export-modal" class="share-modal-overlay">
+    <div class="share-modal-card export-modal-card">
+      <div class="share-modal-header">
+        <div class="share-modal-title">
+          <i class="material-icons">file_download</i>
+          <span>Export & Download Studio</span>
+        </div>
+        <button id="close-export-modal" class="mdl-button mdl-js-button mdl-button--icon" title="Close">
+          <i class="material-icons">close</i>
+        </button>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="export-tabs">
+        <button class="export-tab-btn active" data-tab="png">
+          <i class="material-icons">image</i>
+          <span>PNG Image</span>
+        </button>
+        <button class="export-tab-btn" data-tab="gif">
+          <i class="material-icons">movie</i>
+          <span>Animated GIF</span>
+        </button>
+        <button class="export-tab-btn" data-tab="json">
+          <i class="material-icons">code</i>
+          <span>JSON Config</span>
+        </button>
+      </div>
+
+      <div class="share-modal-body export-modal-body">
+        <!-- Tab 1: PNG Export -->
+        <div id="export-tab-png" class="export-tab-pane active">
+          <p class="export-tab-desc">Export high-resolution visualization for research papers, presentations, and social media with EpochLab watermark branding.</p>
+          
+          <div class="export-options-grid">
+            <div class="export-option-group">
+              <label class="export-group-label">Visualization View</label>
+              <div class="export-pill-toggle" id="png-mode-toggle">
+                <button type="button" class="export-pill-btn active" data-value="full">Full Architecture</button>
+                <button type="button" class="export-pill-btn" data-value="heatmap">Decision Boundary</button>
+              </div>
+            </div>
+
+            <div class="export-option-group">
+              <label class="export-group-label">Resolution Quality</label>
+              <div class="export-pill-toggle" id="png-scale-toggle">
+                <button type="button" class="export-pill-btn active" data-value="2">2x Retina (HD)</button>
+                <button type="button" class="export-pill-btn" data-value="1">1x Standard</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="export-watermark-row">
+            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="png-watermark-toggle">
+              <input type="checkbox" id="png-watermark-toggle" class="mdl-checkbox__input" checked>
+              <span class="mdl-checkbox__label label">Include EpochLab watermark & model stats</span>
+            </label>
+          </div>
+
+          <div class="export-preview-box">
+            <img id="export-png-preview" alt="Export Preview" />
+            <div id="export-png-spinner" class="export-spinner" style="display:none;">
+              <div class="spinner"></div>
+              <span>Rendering preview...</span>
+            </div>
+          </div>
+
+          <div class="export-action-row">
+            <button id="btn-export-png" class="basic-button export-primary-btn">
+              <i class="material-icons">file_download</i>
+              <span>Download High-Res PNG</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab 2: GIF Export -->
+        <div id="export-tab-gif" class="export-tab-pane">
+          <p class="export-tab-desc">Record dynamic training animation as a GIF with learning progress and EpochLab watermark.</p>
+          
+          <div class="export-options-grid">
+            <div class="export-option-group">
+              <label class="export-group-label">Animation Focus</label>
+              <div class="export-pill-toggle" id="gif-mode-toggle">
+                <button type="button" class="export-pill-btn active" data-value="heatmap">Decision Boundary</button>
+                <button type="button" class="export-pill-btn" data-value="full">Full Network</button>
+              </div>
+            </div>
+
+            <div class="export-option-group">
+              <label class="export-group-label">Target Frames</label>
+              <select id="gif-max-frames" class="export-select">
+                <option value="25">25 frames (~2.5s)</option>
+                <option value="40" selected>40 frames (~3.5s)</option>
+                <option value="60">60 frames (~5.0s)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="export-options-grid">
+            <div class="export-option-group">
+              <label class="export-group-label">Sample Frequency</label>
+              <select id="gif-frame-interval" class="export-select">
+                <option value="1">Every epoch</option>
+                <option value="2" selected>Every 2 epochs</option>
+                <option value="5">Every 5 epochs</option>
+              </select>
+            </div>
+
+            <div class="export-option-group">
+              <label class="export-group-label">Frame Rate</label>
+              <select id="gif-fps" class="export-select">
+                <option value="10">10 FPS</option>
+                <option value="12" selected>12 FPS (Smooth)</option>
+                <option value="15">15 FPS (Fast)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="export-gif-instruction">
+            <i class="material-icons">info_outline</i>
+            <span>Click <b>Start Recording GIF</b>. EpochLab will run the network and record frames until target is reached or until you click Finish.</span>
+          </div>
+
+          <div class="export-action-row">
+            <button id="btn-start-record-gif" class="basic-button export-primary-btn rec-btn">
+              <span class="rec-pulse-dot"></span>
+              <span>Start Recording GIF</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab 3: JSON Config & Weights -->
+        <div id="export-tab-json" class="export-tab-pane">
+          <p class="export-tab-desc">Export complete network hyperparameters, architecture, and trained weights for sharing, reproducible benchmarks, or later reload.</p>
+          
+          <div class="export-json-grid">
+            <div class="export-json-card">
+              <div class="json-card-icon"><i class="material-icons">file_download</i></div>
+              <h5>Export Network Config</h5>
+              <p>Download full model state including all link weights and node biases in a clean JSON format.</p>
+              <button id="btn-export-json" class="basic-button export-primary-btn">
+                <i class="material-icons">file_download</i>
+                <span>Download JSON</span>
+              </button>
+            </div>
+
+            <div class="export-json-card">
+              <div class="json-card-icon"><i class="material-icons">file_upload</i></div>
+              <h5>Import Network Config</h5>
+              <p>Load a previously saved model JSON to restore the exact network shape, parameters, and weights.</p>
+              <input type="file" id="json-file-input" accept=".json,application/json" style="display:none;" />
+              <button id="btn-import-json" class="basic-button export-secondary-btn">
+                <i class="material-icons">upload_file</i>
+                <span>Choose JSON File</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Toast Notification -->
+  <div id="toast" class="toast">
+    <i class="material-icons">check_circle</i>
+    <span class="toast-message">Link copied to clipboard!</span>
+  </div>
+
+  <script>window.ga = window.ga || function() {};</script>
+  <script src="bundle.js?v=3"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var btn = document.getElementById('theme-toggle');
+      if (btn) {
+        btn.addEventListener('click', function() {
+          var html = document.documentElement;
+          var isDark = html.getAttribute('data-theme') === 'dark';
+          if (isDark) {
+            html.removeAttribute('data-theme');
+            localStorage.setItem('epochlab-theme', 'light');
+            localStorage.setItem('tronlab-theme', 'light');
+          } else {
+            html.setAttribute('data-theme', 'dark');
+            localStorage.setItem('epochlab-theme', 'dark');
+            localStorage.setItem('tronlab-theme', 'dark');
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
