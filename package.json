@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "start": "npm run serve-watch",
-    "prep": "copyfiles analytics.js preview.png blog.css dist && copyfiles -u 1 \"public/**/*\" dist && concat node_modules/material-design-lite/material.min.css styles.css blog.css > dist/bundle.css && concat node_modules/material-design-lite/material.min.js node_modules/seedrandom/seedrandom.min.js > dist/lib.js",
+    "prep": "copyfiles analytics.js preview.png blog.css favicon.png favicon.svg dist && copyfiles -u 1 \"public/**/*\" dist && concat node_modules/material-design-lite/material.min.css styles.css blog.css > dist/bundle.css && concat node_modules/material-design-lite/material.min.js node_modules/seedrandom/seedrandom.min.js > dist/lib.js",
     "build-css": "concat node_modules/material-design-lite/material.min.css styles.css blog.css > dist/bundle.css",
     "watch-css": "concat node_modules/material-design-lite/material.min.css styles.css blog.css -o dist/bundle.css",
     "build-html": "copyfiles index.html dist",
